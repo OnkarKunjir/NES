@@ -17,4 +17,7 @@ public:
 
   /// Write 1 byte of data from address.
   void write(uint16_t address, uint8_t data);
+
+private:
+  uint8_t m_ram[0xffff];
 };

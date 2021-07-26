@@ -1,6 +1,7 @@
 #include "Bus.hpp"
+#include "Cpu.hpp"
 
 int main() {
-  Bus bus;
+  Cpu::test_address_modes();
   return 0;
 }

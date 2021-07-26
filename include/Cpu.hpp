@@ -11,6 +11,9 @@ class Cpu {
 public:
   Cpu(Bus *bus);
 
+  /// Function to test addressing modes.
+  static void test_address_modes();
+
 private:
   /// Context of bus.
   Bus *m_bus;

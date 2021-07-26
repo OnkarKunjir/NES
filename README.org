@@ -1,9 +1,5 @@
 #+title: NES Emulator
 
-* Table of Contents :toc:
-- [[#tasks][Tasks]]
-- [[#resources][Resources]]
-
 * Tasks
 - [-] Implement addressing modes.
 - [ ] Implement flags.
