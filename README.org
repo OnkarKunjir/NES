@@ -1,0 +1,14 @@
+#+title: NES Emulator
+
+* Table of Contents :toc:
+- [[#tasks][Tasks]]
+- [[#resources][Resources]]
+
+* Tasks
+- [-] Implement addressing modes.
+- [ ] Implement flags.
+- [ ] Implement official instructions.
+
+* Resources
+- [[https://wiki.nesdev.com/w/index.php/NES_reference_guide][nesdev reference guide]]
+- [[http://users.telenet.be/kim1-6502/6502/proman.html][6502 programming manual]]
