@@ -1,8 +1,8 @@
 #+title: NES Emulator
 
 * Tasks
-- [-] Implement addressing modes.
-- [ ] Implement flags.
+- [X] Implement addressing modes.
+- [-] Implement flags.
 - [ ] Implement official instructions.
 
 * Resources

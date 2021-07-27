@@ -4,15 +4,23 @@
 
 #include <cstdint>
 
+struct Flag {
+  uint8_t carry : 1;
+  uint8_t zero : 1;
+  uint8_t interrupt_disable : 1;
+  uint8_t decimal_mode : 1;
+  uint8_t break_command : 1;
+  uint8_t expansion : 1;
+  uint8_t overflow : 1;
+  uint8_t negative : 1;
+};
+
 /**
  * Cpu class emulates behaviour of 6502 processor used in NES.
  */
 class Cpu {
 public:
   Cpu(Bus *bus);
-
-  /// Function to test addressing modes.
-  static void test_address_modes();
 
 private:
   /// Context of bus.
@@ -30,6 +38,9 @@ private:
   /// Program counter.
   uint16_t m_pc;
 
+  /// Processor status register.
+  Flag m_p;
+
   /// holds effective address of the data, simulates behaviour of ADH and ADL.
   uint16_t m_effective_address;
 
@@ -46,4 +57,11 @@ private:
   uint8_t zero_page_y_indexed();
   uint8_t indexed_indirect();
   uint8_t indirect_indexed();
+
+  uint8_t AND();
+  uint8_t OR();
+  uint8_t EOR();
+
+  uint8_t ADC();
+  uint8_t SBC();
 };
