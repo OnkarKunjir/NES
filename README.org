@@ -2,7 +2,7 @@
 
 * Tasks
 - [X] Implement addressing modes.
-- [-] Implement flags.
+- [X] Implement flags.
 - [ ] Implement official instructions.
 
 * Resources

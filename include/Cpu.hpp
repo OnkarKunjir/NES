@@ -22,6 +22,10 @@ class Cpu {
 public:
   Cpu(Bus *bus);
 
+  void log() const;
+
+  static void test();
+
 private:
   /// Context of bus.
   Bus *m_bus;

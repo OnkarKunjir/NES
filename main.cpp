@@ -1,4 +1,8 @@
 #include "Bus.hpp"
 #include "Cpu.hpp"
 
-int main() { return 0; }
+int main() {
+  Cpu::test();
+
+  return 0;
+}
