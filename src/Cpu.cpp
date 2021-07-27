@@ -100,7 +100,7 @@ uint8_t Cpu::AND() {
   return 0;
 }
 
-uint8_t Cpu::OR() {
+uint8_t Cpu::ORA() {
   m_fetched_data = m_bus->read(m_effective_address);
   m_a |= m_fetched_data;
   m_p.zero = (m_a == 0);

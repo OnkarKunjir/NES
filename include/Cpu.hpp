@@ -4,6 +4,9 @@
 
 #include <cstdint>
 
+/**
+ * Structure to hold various flags used in processor status word in 6502.
+ */
 struct Flag {
   uint8_t carry : 1;
   uint8_t zero : 1;
@@ -51,21 +54,111 @@ private:
   /// holds fetched data from the address m_absolute_address.
   uint8_t m_fetched_data;
 
+  /**
+   * Immidiate addressing uses opcode as value.
+   * Each instruction is 2 bytes instruction containing opcode and oprand.
+   */
   uint8_t immediate_addresing();
+
+  /**
+   * Absolute addressing is 3 byte instruction. Contains 2 byte address of data.
+   * opcode | low address byte | high address byte
+   */
   uint8_t absolute_addresing();
+
+  /**
+   * Zero page addressing is 2 byte instruction. Opcode is used as index in page
+   * 0 of memory.
+   */
   uint8_t zero_page_addressing();
+
+  /**
+   * Used in braching instructions.
+   * TODO: yet to be implemented.
+   */
   uint8_t relative_addressing();
+
+  /**
+   * Similar to absolute_addressing but X index is added to obtain effective
+   * address.
+   */
   uint8_t absolute_x_indexed();
+
+  /**
+   * Similar to absolute_addressing but Y index is added to obtain effective
+   * address.
+   */
   uint8_t absolute_y_indexed();
+
+  /**
+   * Similar to zero_page_addressing but X index is added to obtain effective
+   * address. If effective address > 0xFF then effective_address =
+   * effective_address % 256
+   */
   uint8_t zero_page_x_indexed();
+
+  /**
+   * Similar to zero_page_addressing but Y index is added to obtain effective
+   * address. If effective address > 0xFF then effective_address =
+   * effective_address % 256
+   */
   uint8_t zero_page_y_indexed();
+
+  /**
+   * Indexed indirect is 2 byte long instruction and uses X index register to
+   * calculate effective address.
+   * @see http://users.telenet.be/kim1-6502/6502/proman.html#f65
+   */
   uint8_t indexed_indirect();
+
+  /**
+   * Indirect indexed is 2 byte long insturction and uses Y index register to
+   * calculate effective address.
+   * @see http://users.telenet.be/kim1-6502/6502/proman.html#f66
+   */
   uint8_t indirect_indexed();
 
+  /**
+   * Bitwise AND the memory contents with the accumulator and store result in
+   * the accumulator.
+   * Set zero flag if accumulator is zero.
+   * Set negative flag if 7th bit of accumulator is set.
+   */
   uint8_t AND();
-  uint8_t OR();
+
+  /**
+   * Bitwise OR the memory contents with the accumulator and store result in
+   * the accumulator.
+   * Set zero flag if accumulator is zero.
+   * Set negative flag if 7th bit of accumulator is set.
+   */
+  uint8_t ORA();
+
+  /**
+   * Bitwise EXOR the memory contents with the accumulator and store result in
+   * the accumulator.
+   * Set zero flag if accumulator is zero.
+   * Set negative flag if 7th bit of accumulator is set.
+   */
   uint8_t EOR();
 
+  /**
+   * Add memory to accumulator with carry and store result in accumulator.
+   * Set zero flag if accumulator is zero.
+   * Set carry flag if result is > 255.
+   * Set negative flag if 7th bit of accumulator is set.
+   * Set overflow flag if addition changes the sign of result in signed additon.
+   */
   uint8_t ADC();
+
+  /**
+   * Substract memory from accumulator with carry and store result in
+   * accumulator.
+   * Set zero flag if accumulator is zero.
+   * Set carry flag if result is >= 0.
+   * Set negative flag if 7th bit of accumulator is set.
+   * Set overflow flag if substraction changes the sign of result in signed
+   * additon.
+   */
   uint8_t SBC();
 };
