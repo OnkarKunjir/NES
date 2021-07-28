@@ -155,3 +155,125 @@ uint8_t Cpu::SBC() {
   m_a = result & 0xFF;
   return 0;
 }
+
+uint8_t Cpu::CMP() {
+  uint16_t result = 0;
+  m_fetched_data = m_bus->read(m_effective_address);
+  result = m_a - m_fetched_data;
+
+  m_p.zero = (result & 0xFF) == 0;
+  m_p.negative = (result & 0x80) > 1;
+  m_p.carry = (m_fetched_data <= m_a);
+  return 0;
+}
+
+uint8_t Cpu::CPX() {
+  uint16_t result = 0;
+  m_fetched_data = m_bus->read(m_effective_address);
+  result = m_x - m_fetched_data;
+
+  m_p.zero = (result & 0xFF) == 0;
+  m_p.negative = (result & 0x80) > 1;
+  m_p.carry = (m_fetched_data <= m_x);
+  return 0;
+}
+
+uint8_t Cpu::CPY() {
+  uint16_t result = 0;
+  m_fetched_data = m_bus->read(m_effective_address);
+  result = m_y - m_fetched_data;
+
+  m_p.zero = (result & 0xFF) == 0;
+  m_p.negative = (result & 0x80) > 1;
+  m_p.carry = (m_fetched_data <= m_y);
+  return 0;
+}
+
+uint8_t Cpu::DEC() {
+  m_fetched_data = m_bus->read(m_effective_address);
+  m_fetched_data--;
+  m_bus->write(m_effective_address, m_fetched_data);
+
+  m_p.zero = (m_fetched_data == 0);
+  m_p.negative = (m_fetched_data & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::DEX() {
+  m_x--;
+
+  m_p.zero = (m_x == 0);
+  m_p.negative = (m_x & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::DEY() {
+  m_y--;
+
+  m_p.zero = (m_y == 0);
+  m_p.negative = (m_y & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::INC() {
+  m_fetched_data = m_bus->read(m_effective_address);
+  m_fetched_data++;
+  m_bus->write(m_effective_address, m_fetched_data);
+
+  m_p.zero = (m_fetched_data == 0);
+  m_p.negative = (m_fetched_data & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::INX() {
+  m_x++;
+
+  m_p.zero = (m_x == 0);
+  m_p.negative = (m_x & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::INY() {
+  m_y++;
+
+  m_p.zero = (m_y == 0);
+  m_p.negative = (m_y & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::ASL() {
+  // TODO: implement for implied addressing mode.
+  m_fetched_data = m_bus->read(m_effective_address);
+  m_p.carry = (m_fetched_data & 0x80) > 0;
+  m_fetched_data = m_fetched_data << 1;
+  m_p.negative = (m_fetched_data & 0x80) > 0;
+  m_p.zero = (m_fetched_data == 0);
+  m_bus->write(m_effective_address, m_fetched_data);
+  return 0;
+}
+
+uint8_t Cpu::ROL() {
+  m_fetched_data = m_bus->read(m_effective_address);
+  uint8_t result = m_fetched_data << 1;
+  result = result | m_p.carry;
+  m_p.carry = (m_fetched_data & 0x80) > 0;
+  m_bus->write(m_effective_address, result);
+  return 0;
+}
+
+uint8_t Cpu::LSR() {
+  m_fetched_data = m_bus->read(m_effective_address);
+  m_p.carry = m_fetched_data & 1;
+  m_fetched_data = m_fetched_data >> 1;
+  m_bus->write(m_effective_address, m_fetched_data);
+  return 0;
+}
+
+uint8_t Cpu::ROR() {
+  m_fetched_data = m_bus->read(m_effective_address);
+  uint8_t result = m_fetched_data >> 1;
+  result = result | (m_p.carry << 7);
+  m_p.carry = m_fetched_data & 1;
+  m_bus->write(m_effective_address, result);
+  return 0;
+}

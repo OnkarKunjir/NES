@@ -161,4 +161,96 @@ private:
    * additon.
    */
   uint8_t SBC();
+
+  /**
+   * Compare contents of accumulator and memory by substracting value from
+   * accumulator.
+   * Set zero flag if both are equal.
+   * Set carry flag if value is less than or equal to accumulator.
+   * Set negative flag if result of substaction is negative.
+   */
+  uint8_t CMP();
+
+  /**
+   * Compare contents of X index register and memory by substracting value from
+   * it.
+   * Set zero flag if both are equal.
+   * Set carry flag if value is less than or equal to accumulator.
+   * Set negative flag if result of substaction is negative.
+   */
+  uint8_t CPX();
+
+  /**
+   * Compare contents of X index register and memory by substracting value from
+   * it.
+   * Set zero flag if both are equal.
+   * Set carry flag if value is less than or equal to accumulator.
+   * Set negative flag if result of substaction is negative.
+   */
+  uint8_t CPY();
+
+  /**
+   * Decrement value of memory location by one.
+   * Set negative flag if 7th bit is set for result.
+   * Set zero flag if reuslt is zero.
+   */
+  uint8_t DEC();
+
+  /**
+   * Decrement value of index register X and store it in index register X.
+   * Set negative flag if 7th bit is set.
+   * Set zero flag if index register X is zero.
+   */
+  uint8_t DEX();
+
+  /**
+   * Decrement value of index register Y and store it in index register Y.
+   * Set negative flag if 7th bit is set.
+   * Set zero flag if index register Y is zero.
+   */
+  uint8_t DEY();
+
+  /**
+   * Increment value of memory location by one.
+   * Set negative flag if 7th bit is set.
+   * Set zero flag if value is equal to zero after operation.
+   */
+  uint8_t INC();
+
+  /**
+   * Increment value of X index register by one.
+   * Set negative flag if 7th bit is set.
+   * Set zero flag if value is equal to zero after operation.
+   */
+  uint8_t INX();
+
+  /**
+   * Increment value of X index location by one.
+   * Set negative flag if 7th bit is set.
+   * Set zero flag if value is equal to zero after operation.
+   */
+  uint8_t INY();
+
+  /**
+   * Shift the contnet of accumulator or memory location to left by one bit. 7th
+   * bit is stored in carry flag.
+   *
+   */
+  // TODO: Change behaviour depending upon addressing mode.
+  uint8_t ASL();
+
+  /**
+   * Rotate content of accumulator or memory to left.
+   */
+  uint8_t ROL();
+
+  /**
+   * Shit content of accumulator or memory to right.
+   */
+  uint8_t LSR();
+
+  /**
+   * Rotate content of accumulator or memory to right.
+   */
+  uint8_t ROR();
 };
