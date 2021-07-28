@@ -5,17 +5,17 @@
 #include <cstdint>
 
 /**
- * Structure to hold various flags used in processor status word in 6502.
+ * Falg bit in processor status register.
  */
-struct Flag {
-  uint8_t carry : 1;
-  uint8_t zero : 1;
-  uint8_t interrupt_disable : 1;
-  uint8_t decimal_mode : 1;
-  uint8_t break_command : 1;
-  uint8_t expansion : 1;
-  uint8_t overflow : 1;
-  uint8_t negative : 1;
+enum Flag {
+  carry = (1 << 0),
+  zero = (1 << 1),
+  interrupt_disable = (1 << 2),
+  decimal_mode = (1 << 3),
+  break_command = (1 << 4),
+  expansion = (1 << 5),
+  overflow = (1 << 6),
+  negative = (1 << 7)
 };
 
 /**
@@ -46,13 +46,25 @@ private:
   uint16_t m_pc;
 
   /// Processor status register.
-  Flag m_p;
+  uint8_t m_p;
 
   /// holds effective address of the data, simulates behaviour of ADH and ADL.
   uint16_t m_effective_address;
 
   /// holds fetched data from the address m_absolute_address.
   uint8_t m_fetched_data;
+
+  /**
+   * Function to set flag value to value in processor status register.
+   * @param flag Specify flag to modify.
+   * @param value Specify value to set as flag.
+   */
+  void m_set_flag(Flag flag, bool value);
+
+  /**
+   * @return Flag value speficied by flag.
+   */
+  uint8_t m_get_flag(Flag flag) const;
 
   /**
    * Immidiate addressing uses opcode as value.

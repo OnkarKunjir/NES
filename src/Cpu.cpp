@@ -11,18 +11,26 @@ void Cpu::log() const {
             << "\n";
 
   std::cout << "Flags             : N V X B D I Z C\n";
-  std::cout << "                    " << (int)m_p.negative << " "
-            << (int)m_p.overflow << " " << (int)m_p.expansion << " "
-            << (int)m_p.break_command << " " << (int)m_p.decimal_mode << " "
-            << (int)m_p.interrupt_disable << " " << (int)m_p.zero << " "
-            << (int)m_p.carry << "\n";
+  // std::cout << "                    " << (int)m_p.negative << " "
+  //           << (int)m_p.overflow << " " << (int)m_p.expansion << " "
+  //           << (int)m_p.break_command << " " << (int)m_p.decimal_mode << " "
+  //           << (int)m_p.interrupt_disable << " " << (int)m_p.zero << " "
+  //           << (int)m_p.carry << "\n";
 }
 
 void Cpu::test() {
   Bus bus;
   Cpu cpu(&bus);
-  std::cout << std::hex << cpu.m_p << std::endl;
 }
+
+void Cpu::m_set_flag(Flag flag, bool value) {
+  if (value)
+    m_p |= flag;
+  else
+    m_p &= ~flag;
+}
+
+uint8_t Cpu::m_get_flag(Flag flag) const { return (m_p & flag) > 0 ? 1 : 0; }
 
 uint8_t Cpu::immediate_addresing() {
   m_effective_address = m_pc++;
@@ -96,41 +104,41 @@ uint8_t Cpu::indirect_indexed() {
 uint8_t Cpu::AND() {
   m_fetched_data = m_bus->read(m_effective_address);
   m_a &= m_fetched_data;
-  m_p.zero = (m_a == 0);
-  m_p.negative = (m_a >> 7);
+  m_set_flag(zero, m_a == 0);
+  m_set_flag(negative, m_a & 0x80);
   return 0;
 }
 
 uint8_t Cpu::ORA() {
   m_fetched_data = m_bus->read(m_effective_address);
   m_a |= m_fetched_data;
-  m_p.zero = (m_a == 0);
-  m_p.negative = (m_a >> 7);
+  m_set_flag(zero, m_a == 0);
+  m_set_flag(negative, m_a & 0x80);
   return 0;
 }
 
 uint8_t Cpu::EOR() {
   m_fetched_data = m_bus->read(m_effective_address);
   m_a ^= m_fetched_data;
-  m_p.zero = (m_a == 0);
-  m_p.negative = (m_a >> 7);
+  m_set_flag(zero, m_a == 0);
+  m_set_flag(negative, m_a & 0x80);
   return 0;
 }
 
 uint8_t Cpu::ADC() {
   uint16_t result = 0;
   m_fetched_data = m_bus->read(m_effective_address);
-  result = m_a + m_fetched_data + m_p.carry;
+  result = m_a + m_fetched_data + m_get_flag(carry);
   /// set appropriate flags.
-  m_p.carry = result > 255;
-  m_p.zero = !(result & 0xFF);
-  m_p.negative = (result & 0x80) > 0;
+  m_set_flag(carry, result > 255);
+  m_set_flag(zero, !(result & 0xFF));
+  m_set_flag(negative, result & 0x80);
 
   if ((m_a & 0x80) == (m_fetched_data & 0x80)) {
     // if both the numbers have same sign then their is possibility of overflow.
     // check the sign bit of result and accumulator before addition.
     // if sign is changed then set overflow flag else reset.
-    m_p.overflow = (m_a & 0x80) != (result & 0x80);
+    m_set_flag(overflow, (m_a & 0x80) != (result & 0x80));
   }
   // store result in accumulator.
   m_a = result & 0xFF;
@@ -140,17 +148,17 @@ uint8_t Cpu::ADC() {
 uint8_t Cpu::SBC() {
   uint16_t result = 0;
   m_fetched_data = m_bus->read(m_effective_address);
-  result = m_a - m_fetched_data - m_p.carry;
+  result = m_a - m_fetched_data - m_get_flag(carry);
 
-  m_p.carry = (result & 0x80) == 0;
-  m_p.zero = (result & 0xFF) == 0;
-  m_p.negative = (result & 0x80) > 0;
+  m_set_flag(carry, (result & 0x80) == 0);
+  m_set_flag(zero, !(result & 0xFF));
+  m_set_flag(negative, result & 0x80);
 
   if ((m_a & 0x80) != (m_fetched_data & 0x80)) {
     // if both the numbers have different sign then their is possibility of
     // overflow. check the sign bit of result and accumulator before addition.
     // if sign is changed then set overflow flag else reset.
-    m_p.overflow = (m_a & 0x80) != (result & 0x80);
+    m_set_flag(overflow, (m_a & 0x80) != (result & 0x80));
   }
   // store result in accumulator.
   m_a = result & 0xFF;
@@ -162,9 +170,9 @@ uint8_t Cpu::CMP() {
   m_fetched_data = m_bus->read(m_effective_address);
   result = m_a - m_fetched_data;
 
-  m_p.zero = (result & 0xFF) == 0;
-  m_p.negative = (result & 0x80) > 1;
-  m_p.carry = (m_fetched_data <= m_a);
+  m_set_flag(zero, !(result & 0xFF));
+  m_set_flag(negative, result & 0x80);
+  m_set_flag(carry, (m_fetched_data <= m_a));
   return 0;
 }
 
@@ -173,9 +181,9 @@ uint8_t Cpu::CPX() {
   m_fetched_data = m_bus->read(m_effective_address);
   result = m_x - m_fetched_data;
 
-  m_p.zero = (result & 0xFF) == 0;
-  m_p.negative = (result & 0x80) > 1;
-  m_p.carry = (m_fetched_data <= m_x);
+  m_set_flag(zero, !(result & 0xFF));
+  m_set_flag(negative, result & 0x80);
+  m_set_flag(carry, m_fetched_data <= m_x);
   return 0;
 }
 
@@ -184,9 +192,9 @@ uint8_t Cpu::CPY() {
   m_fetched_data = m_bus->read(m_effective_address);
   result = m_y - m_fetched_data;
 
-  m_p.zero = (result & 0xFF) == 0;
-  m_p.negative = (result & 0x80) > 1;
-  m_p.carry = (m_fetched_data <= m_y);
+  m_set_flag(zero, !(result & 0xFF));
+  m_set_flag(negative, result & 0x80);
+  m_set_flag(carry, m_fetched_data <= m_y);
   return 0;
 }
 
@@ -195,24 +203,24 @@ uint8_t Cpu::DEC() {
   m_fetched_data--;
   m_bus->write(m_effective_address, m_fetched_data);
 
-  m_p.zero = (m_fetched_data == 0);
-  m_p.negative = (m_fetched_data & 0x80) > 0;
+  m_set_flag(zero, !m_fetched_data);
+  m_set_flag(negative, m_fetched_data & 0x80);
   return 0;
 }
 
 uint8_t Cpu::DEX() {
   m_x--;
 
-  m_p.zero = (m_x == 0);
-  m_p.negative = (m_x & 0x80) > 0;
+  m_set_flag(zero, !m_x);
+  m_set_flag(negative, m_x & 0x80);
   return 0;
 }
 
 uint8_t Cpu::DEY() {
   m_y--;
 
-  m_p.zero = (m_y == 0);
-  m_p.negative = (m_y & 0x80) > 0;
+  m_set_flag(zero, !m_y);
+  m_set_flag(negative, m_y & 0x80);
   return 0;
 }
 
@@ -221,34 +229,34 @@ uint8_t Cpu::INC() {
   m_fetched_data++;
   m_bus->write(m_effective_address, m_fetched_data);
 
-  m_p.zero = (m_fetched_data == 0);
-  m_p.negative = (m_fetched_data & 0x80) > 0;
+  m_set_flag(zero, !m_fetched_data);
+  m_set_flag(negative, m_fetched_data & 0x80);
   return 0;
 }
 
 uint8_t Cpu::INX() {
   m_x++;
 
-  m_p.zero = (m_x == 0);
-  m_p.negative = (m_x & 0x80) > 0;
+  m_set_flag(zero, !m_x);
+  m_set_flag(negative, m_x & 0x80);
   return 0;
 }
 
 uint8_t Cpu::INY() {
   m_y++;
 
-  m_p.zero = (m_y == 0);
-  m_p.negative = (m_y & 0x80) > 0;
+  m_set_flag(zero, !m_y);
+  m_set_flag(negative, m_y & 0x80);
   return 0;
 }
 
 uint8_t Cpu::ASL() {
   // TODO: implement for implied addressing mode.
   m_fetched_data = m_bus->read(m_effective_address);
-  m_p.carry = (m_fetched_data & 0x80) > 0;
+  m_set_flag(carry, m_fetched_data & 0x80);
   m_fetched_data = m_fetched_data << 1;
-  m_p.negative = (m_fetched_data & 0x80) > 0;
-  m_p.zero = (m_fetched_data == 0);
+  m_set_flag(negative, m_fetched_data & 0x80);
+  m_set_flag(zero, !m_fetched_data);
   m_bus->write(m_effective_address, m_fetched_data);
   return 0;
 }
@@ -256,15 +264,15 @@ uint8_t Cpu::ASL() {
 uint8_t Cpu::ROL() {
   m_fetched_data = m_bus->read(m_effective_address);
   uint8_t result = m_fetched_data << 1;
-  result = result | m_p.carry;
-  m_p.carry = (m_fetched_data & 0x80) > 0;
+  result = result | m_get_flag(carry);
+  m_set_flag(carry, m_fetched_data & 0x80);
   m_bus->write(m_effective_address, result);
   return 0;
 }
 
 uint8_t Cpu::LSR() {
   m_fetched_data = m_bus->read(m_effective_address);
-  m_p.carry = m_fetched_data & 1;
+  m_set_flag(carry, m_fetched_data & 1);
   m_fetched_data = m_fetched_data >> 1;
   m_bus->write(m_effective_address, m_fetched_data);
   return 0;
@@ -273,8 +281,8 @@ uint8_t Cpu::LSR() {
 uint8_t Cpu::ROR() {
   m_fetched_data = m_bus->read(m_effective_address);
   uint8_t result = m_fetched_data >> 1;
-  result = result | (m_p.carry << 7);
-  m_p.carry = m_fetched_data & 1;
+  result = result | (m_get_flag(carry) << 7);
+  m_set_flag(carry, m_fetched_data & 1);
   m_bus->write(m_effective_address, result);
   return 0;
 }
@@ -282,8 +290,8 @@ uint8_t Cpu::ROR() {
 uint8_t Cpu::LDA() {
   m_fetched_data = m_bus->read(m_effective_address);
   m_a = m_fetched_data;
-  m_p.zero = (m_a == 0);
-  m_p.negative = (m_a & 0x80) > 0;
+  m_set_flag(zero, !m_a);
+  m_set_flag(negative, m_a & 0x80);
   return 0;
 }
 
@@ -295,8 +303,8 @@ uint8_t Cpu::STA() {
 uint8_t Cpu::LDX() {
   m_fetched_data = m_bus->read(m_effective_address);
   m_x = m_fetched_data;
-  m_p.zero = (m_x == 0);
-  m_p.negative = (m_x & 0x80) > 0;
+  m_set_flag(zero, !m_x);
+  m_set_flag(negative, m_x & 0x80);
   return 0;
 }
 
@@ -308,8 +316,8 @@ uint8_t Cpu::STX() {
 uint8_t Cpu::LDY() {
   m_fetched_data = m_bus->read(m_effective_address);
   m_y = m_fetched_data;
-  m_p.zero = (m_y == 0);
-  m_p.negative = (m_y & 0x80) > 0;
+  m_set_flag(zero, !m_y);
+  m_set_flag(negative, m_y & 0x80);
   return 0;
 }
 
@@ -320,51 +328,51 @@ uint8_t Cpu::STY() {
 
 uint8_t Cpu::TAX() {
   m_x = m_a;
-  m_p.zero = (m_x == 0);
-  m_p.negative = (m_x & 0x80) > 0;
+  m_set_flag(zero, !m_x);
+  m_set_flag(negative, m_x & 0x80);
   return 0;
 }
 
 uint8_t Cpu::TXA() {
   m_a = m_x;
-  m_p.zero = (m_a == 0);
-  m_p.negative = (m_a & 0x80) > 0;
+  m_set_flag(zero, !m_a);
+  m_set_flag(negative, m_a & 0x80);
   return 0;
 }
 
 uint8_t Cpu::TAY() {
   m_y = m_a;
-  m_p.zero = (m_y == 0);
-  m_p.negative = (m_y & 0x80) > 0;
+  m_set_flag(zero, !m_y);
+  m_set_flag(negative, m_y & 0x80);
   return 0;
 }
 
 uint8_t Cpu::TYA() {
   m_a = m_y;
-  m_p.zero = (m_a == 0);
-  m_p.negative = (m_a & 0x80) > 0;
+  m_set_flag(zero, !m_a);
+  m_set_flag(negative, m_a & 0x80);
   return 0;
 }
 
 uint8_t Cpu::TSX() {
   m_x = m_s;
-  m_p.zero = (m_x == 0);
-  m_p.negative = (m_x & 0x80) > 0;
+  m_set_flag(zero, !m_x);
+  m_set_flag(negative, m_x & 0x80);
   return 0;
 }
 
 uint8_t Cpu::TXS() {
   m_s = m_x;
-  m_p.zero = (m_s == 0);
-  m_p.negative = (m_s & 0x80) > 0;
+  m_set_flag(zero, !m_s);
+  m_set_flag(negative, m_s & 0x80);
   return 0;
 }
 
 uint8_t Cpu::PLA() {
   m_s++;
   m_a = m_bus->read(m_s);
-  m_p.zero = (m_a == 0);
-  m_p.negative = (m_a & 0x80) > 0;
+  m_set_flag(zero, !m_a);
+  m_set_flag(negative, m_a & 0x80);
   return 0;
 }
 
