@@ -21,6 +21,7 @@ void Cpu::log() const {
 void Cpu::test() {
   Bus bus;
   Cpu cpu(&bus);
+  std::cout << std::hex << cpu.m_p << std::endl;
 }
 
 uint8_t Cpu::immediate_addresing() {
@@ -277,3 +278,100 @@ uint8_t Cpu::ROR() {
   m_bus->write(m_effective_address, result);
   return 0;
 }
+
+uint8_t Cpu::LDA() {
+  m_fetched_data = m_bus->read(m_effective_address);
+  m_a = m_fetched_data;
+  m_p.zero = (m_a == 0);
+  m_p.negative = (m_a & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::STA() {
+  m_bus->write(m_effective_address, m_a);
+  return 0;
+}
+
+uint8_t Cpu::LDX() {
+  m_fetched_data = m_bus->read(m_effective_address);
+  m_x = m_fetched_data;
+  m_p.zero = (m_x == 0);
+  m_p.negative = (m_x & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::STX() {
+  m_bus->write(m_effective_address, m_x);
+  return 0;
+}
+
+uint8_t Cpu::LDY() {
+  m_fetched_data = m_bus->read(m_effective_address);
+  m_y = m_fetched_data;
+  m_p.zero = (m_y == 0);
+  m_p.negative = (m_y & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::STY() {
+  m_bus->write(m_effective_address, m_y);
+  return 0;
+}
+
+uint8_t Cpu::TAX() {
+  m_x = m_a;
+  m_p.zero = (m_x == 0);
+  m_p.negative = (m_x & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::TXA() {
+  m_a = m_x;
+  m_p.zero = (m_a == 0);
+  m_p.negative = (m_a & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::TAY() {
+  m_y = m_a;
+  m_p.zero = (m_y == 0);
+  m_p.negative = (m_y & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::TYA() {
+  m_a = m_y;
+  m_p.zero = (m_a == 0);
+  m_p.negative = (m_a & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::TSX() {
+  m_x = m_s;
+  m_p.zero = (m_x == 0);
+  m_p.negative = (m_x & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::TXS() {
+  m_s = m_x;
+  m_p.zero = (m_s == 0);
+  m_p.negative = (m_s & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::PLA() {
+  m_s++;
+  m_a = m_bus->read(m_s);
+  m_p.zero = (m_a == 0);
+  m_p.negative = (m_a & 0x80) > 0;
+  return 0;
+}
+
+uint8_t Cpu::PHA() {
+  m_s--;
+  m_bus->write(m_s, m_a);
+  return 0;
+}
+
+uint8_t Cpu::PLP() { return 0; }

@@ -253,4 +253,21 @@ private:
    * Rotate content of accumulator or memory to right.
    */
   uint8_t ROR();
+
+  uint8_t LDA();
+  uint8_t STA();
+  uint8_t LDX();
+  uint8_t STX();
+  uint8_t LDY();
+  uint8_t STY();
+  uint8_t TAX();
+  uint8_t TXA();
+  uint8_t TAY();
+  uint8_t TYA();
+  uint8_t TSX();
+  uint8_t TXS();
+  uint8_t PLA();
+  uint8_t PHA();
+  uint8_t PLP();
+  uint8_t PHP();
 };
