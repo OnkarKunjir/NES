@@ -11,16 +11,13 @@ void Cpu::log() const {
             << "\n";
 
   std::cout << "Flags             : N V X B D I Z C\n";
-  // std::cout << "                    " << (int)m_p.negative << " "
-  //           << (int)m_p.overflow << " " << (int)m_p.expansion << " "
-  //           << (int)m_p.break_command << " " << (int)m_p.decimal_mode << " "
-  //           << (int)m_p.interrupt_disable << " " << (int)m_p.zero << " "
-  //           << (int)m_p.carry << "\n";
 }
 
 void Cpu::test() {
   Bus bus;
   Cpu cpu(&bus);
+
+  std::cout << std::hex << (int)((uint8_t)-2) << "\n";
 }
 
 void Cpu::m_set_flag(Flag flag, bool value) {
@@ -48,6 +45,13 @@ uint8_t Cpu::absolute_addresing() {
 
 uint8_t Cpu::zero_page_addressing() {
   m_effective_address = m_bus->read(m_pc++);
+  return 0;
+}
+
+uint8_t Cpu::relative_addressing() {
+  m_effective_address = m_bus->read(m_pc++);
+  if (m_effective_address & 0x80)
+    m_effective_address |= 0xFF;
   return 0;
 }
 
@@ -377,9 +381,19 @@ uint8_t Cpu::PLA() {
 }
 
 uint8_t Cpu::PHA() {
-  m_s--;
   m_bus->write(m_s, m_a);
+  m_s--;
   return 0;
 }
 
-uint8_t Cpu::PLP() { return 0; }
+uint8_t Cpu::PLP() {
+  m_s++;
+  m_p = m_bus->read(m_s);
+  return 0;
+}
+
+uint8_t Cpu::PHP() {
+  m_bus->write(m_s, m_p);
+  m_s--;
+  return 0;
+}
