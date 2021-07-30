@@ -80,13 +80,13 @@ private:
    * Immidiate addressing uses opcode as value.
    * Each instruction is 2 bytes instruction containing opcode and oprand.
    */
-  uint8_t immediate_addresing();
+  uint8_t immediate_addressing();
 
   /**
    * Absolute addressing is 3 byte instruction. Contains 2 byte address of data.
    * opcode | low address byte | high address byte
    */
-  uint8_t absolute_addresing();
+  uint8_t absolute_addressing();
 
   /**
    * Zero page addressing is 2 byte instruction. Opcode is used as index in page

@@ -6,18 +6,39 @@ Cpu::Cpu(Bus *bus) : m_bus(bus) {}
 
 void Cpu::log() const {
   std::cout << "Program counter   : " << std::hex << (int)m_pc << "\n";
-  std::cout << "Accumulator       : " << std::hex << (int)m_a << "\n";
   std::cout << "Effective address : " << std::hex << (int)m_effective_address
             << "\n";
+  std::cout << "Accumulator       : " << std::hex << (int)m_a << "\n";
+  std::cout << "Index X           : " << std::hex << (int)m_x << "\n";
+  std::cout << "Index Y           : " << std::hex << (int)m_y << "\n";
 
   std::cout << "Flags             : N V X B D I Z C\n";
+  std::cout << "                    ";
+  for (int i = 7; i >= 0; i--) {
+    std::cout << (bool)(m_p & (1 << i)) << " ";
+  }
+  std::cout << "\n";
 }
 
 void Cpu::test() {
   Bus bus;
   Cpu cpu(&bus);
 
-  std::cout << std::hex << (int)((uint8_t)-2) << "\n";
+  cpu.m_pc = 0xc010;
+  cpu.m_a = 0x03;
+  cpu.m_x = 0xfe;
+  cpu.m_y = 0x03;
+
+  bus.write(0xc010, 0x04);
+  bus.write(0xc011, 0xff);
+  bus.write(0xff04, 0x03);
+
+  cpu.set_flag(carry, true);
+  cpu.absolute_addressing();
+  cpu.ROR();
+
+  cpu.log();
+  std::cout << std::hex << (int)bus.read(0xff04) << "\n";
 }
 
 void Cpu::set_flag(Flag flag, bool value) {
@@ -29,7 +50,7 @@ void Cpu::set_flag(Flag flag, bool value) {
 
 uint8_t Cpu::get_flag(Flag flag) const { return (m_p & flag) > 0 ? 1 : 0; }
 
-uint8_t Cpu::immediate_addresing() {
+uint8_t Cpu::immediate_addressing() {
   m_effective_address = m_pc++;
   return 0;
 }
@@ -44,7 +65,7 @@ uint8_t Cpu::pop() {
   return m_bus->read(m_s);
 }
 
-uint8_t Cpu::absolute_addresing() {
+uint8_t Cpu::absolute_addressing() {
   // read low order byte.
   m_effective_address = m_bus->read(m_pc++);
   // read high order byte.
@@ -279,7 +300,12 @@ uint8_t Cpu::ROL() {
   m_fetched_data = m_bus->read(m_effective_address);
   uint8_t result = m_fetched_data << 1;
   result = result | get_flag(carry);
+
+  // set flags
   set_flag(carry, m_fetched_data & 0x80);
+  set_flag(zero, !result);
+  set_flag(negative, result & 0x80);
+
   m_bus->write(m_effective_address, result);
   return 0;
 }
@@ -288,6 +314,11 @@ uint8_t Cpu::LSR() {
   m_fetched_data = m_bus->read(m_effective_address);
   set_flag(carry, m_fetched_data & 1);
   m_fetched_data = m_fetched_data >> 1;
+
+  // set flags.
+  set_flag(zero, !m_fetched_data);
+  set_flag(negative, m_fetched_data & 0x80);
+
   m_bus->write(m_effective_address, m_fetched_data);
   return 0;
 }
@@ -296,7 +327,12 @@ uint8_t Cpu::ROR() {
   m_fetched_data = m_bus->read(m_effective_address);
   uint8_t result = m_fetched_data >> 1;
   result = result | (get_flag(carry) << 7);
+
+  // set flags.
   set_flag(carry, m_fetched_data & 1);
+  set_flag(zero, !result);
+  set_flag(negative, result & 0x80);
+
   m_bus->write(m_effective_address, result);
   return 0;
 }
