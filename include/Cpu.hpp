@@ -276,44 +276,201 @@ private:
    */
   uint8_t ROR();
 
+  /**
+   * Load data from memory to accumulator.
+   * Update flags accordingly.
+   */
   uint8_t LDA();
+
+  /**
+   * Store accumulator into memory.
+   */
   uint8_t STA();
+
+  /**
+   * Load index register X from memory location.
+   */
   uint8_t LDX();
+
+  /**
+   * Store index register X into memory location.
+   */
   uint8_t STX();
+
+  /**
+   * Load index register Y from memory location.
+   */
   uint8_t LDY();
+
+  /**
+   * Store index register Y to memory location.
+   */
   uint8_t STY();
+
+  /**
+   * Transfer accumulator to index register X.
+   */
   uint8_t TAX();
+
+  /**
+   * Transfer index register X to accumulator.
+   */
   uint8_t TXA();
+
+  /**
+   * Transfer accumulator to index register Y.
+   */
   uint8_t TAY();
+
+  /**
+   * Transter index register Y to accumulator.
+   */
   uint8_t TYA();
+
+  /**
+   * Transfer stack pointer to index register X.
+   */
   uint8_t TSX();
+
+  /**
+   * Transter index register X to stack pointer.
+   */
   uint8_t TXS();
+
+  /**
+   * Pull accumulator from stack.
+   */
   uint8_t PLA();
+
+  /**
+   * Push accumulator onto the stack.
+   */
   uint8_t PHA();
+
+  /**
+   * Pull status register from stack.
+   */
   uint8_t PLP();
+
+  /**
+   * Push status register onto the stack.
+   */
   uint8_t PHP();
 
+  /**
+   * Branch on result plus.
+   */
   uint8_t BPL();
+
+  /**
+   * Branch on result minus.
+   */
   uint8_t BMI();
+
+  /**
+   * Branch on overflow clear.
+   */
   uint8_t BVC();
+
+  /**
+   * Branch on overflow set.
+   */
   uint8_t BVS();
+
+  /**
+   * Branch on carry clear.
+   */
   uint8_t BCC();
+
+  /**
+   * Branch on carry set.
+   */
   uint8_t BCS();
+
+  /**
+   * Branch on result not zero.
+   */
   uint8_t BNE();
+
+  /**
+   * Brach on result zero.
+   */
   uint8_t BEQ();
+
+  /**
+   * Break current operation push processor status register and program counter
+   * on stack and jump to inturrept subroutine at 0xFFFE/F. Insturction sets the
+   * Break flag.
+   */
   uint8_t BRK();
+
+  /**
+   * Return form inturrept.
+   * Reads program counter and processor status register from stack.
+   */
   uint8_t RTI();
 
+  /**
+   * Jump to subroutine.
+   * Pushes current program counter onto the stack.
+   */
   uint8_t JSR();
+
+  /**
+   * Return from subroutine.
+   */
   uint8_t RTS();
+
+  /**
+   * Jump to arbitary location.
+   */
   uint8_t JMP();
+
+  /**
+   * Test bits of accumulator value.
+   * Set negative flag if 7th bit is set.
+   * Set overflow flag if 6th bit is set.
+   * Set zero flag if accumulator is zero.
+   */
   uint8_t BIT();
+
+  /**
+   * Clear carry flag.
+   */
   uint8_t CLC();
+
+  /**
+   * Set carry flag.
+   */
   uint8_t SEC();
+
+  /**
+   * Clear decimal mode flag.
+   */
   uint8_t CLD();
+
+  /**
+   * Set decimal mode flag.
+   */
   uint8_t SED();
+
+  /**
+   * Clear inturrept disable flag.
+   */
   uint8_t CLI();
+
+  /**
+   * Set inturrpet disable flag.
+   */
   uint8_t SEI();
+
+  /**
+   * Clear overflow flag.
+   */
   uint8_t CLV();
+
+  /**
+   * Do noting.
+   */
   uint8_t NOP();
 };
