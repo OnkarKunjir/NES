@@ -59,12 +59,22 @@ private:
    * @param flag Specify flag to modify.
    * @param value Specify value to set as flag.
    */
-  void m_set_flag(Flag flag, bool value);
+  void set_flag(Flag flag, bool value);
 
   /**
    * @return Flag value speficied by flag.
    */
-  uint8_t m_get_flag(Flag flag) const;
+  uint8_t get_flag(Flag flag) const;
+
+  /**
+   * Push one byte of data onto the stack.
+   */
+  void push(uint8_t data);
+
+  /**
+   * Returns one byte of data at top of stack and updates the stack pointer.
+   */
+  uint8_t pop();
 
   /**
    * Immidiate addressing uses opcode as value.
@@ -282,4 +292,28 @@ private:
   uint8_t PHA();
   uint8_t PLP();
   uint8_t PHP();
+
+  uint8_t BPL();
+  uint8_t BMI();
+  uint8_t BVC();
+  uint8_t BVS();
+  uint8_t BCC();
+  uint8_t BCS();
+  uint8_t BNE();
+  uint8_t BEQ();
+  uint8_t BRK();
+  uint8_t RTI();
+
+  uint8_t JSR();
+  uint8_t RTS();
+  uint8_t JMP();
+  uint8_t BIT();
+  uint8_t CLC();
+  uint8_t SEC();
+  uint8_t CLD();
+  uint8_t SED();
+  uint8_t CLI();
+  uint8_t SEI();
+  uint8_t CLV();
+  uint8_t NOP();
 };
