@@ -2,21 +2,9 @@
 
 #include "Bus.hpp"
 
+#include <array>
 #include <cstdint>
-
-/**
- * Falg bit in processor status register.
- */
-enum Flag {
-  carry = (1 << 0),
-  zero = (1 << 1),
-  interrupt_disable = (1 << 2),
-  decimal_mode = (1 << 3),
-  break_command = (1 << 4),
-  expansion = (1 << 5),
-  overflow = (1 << 6),
-  negative = (1 << 7)
-};
+#include <string>
 
 /**
  * Cpu class emulates behaviour of 6502 processor used in NES.
@@ -29,7 +17,31 @@ public:
 
   static void test();
 
+  /**
+   * Falg bit in processor status register.
+   */
+  enum Flag {
+    carry = (1 << 0),
+    zero = (1 << 1),
+    interrupt_disable = (1 << 2),
+    decimal_mode = (1 << 3),
+    break_command = (1 << 4),
+    expansion = (1 << 5),
+    overflow = (1 << 6),
+    negative = (1 << 7)
+  };
+
+  struct Instruction {
+    std::string opcode;
+    uint8_t (Cpu::*exec)(void) = nullptr;
+    uint8_t (Cpu::*addressing)(void) = nullptr;
+  };
+
 private:
+  /// Array contains mapping of intruction and addressing mode.
+  std::array<Instruction, 255> m_lookup = {"hello", &Cpu::ADC,
+                                           &Cpu::absolute_addressing};
+
   /// Context of bus.
   Bus *m_bus;
 

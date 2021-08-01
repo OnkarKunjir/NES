@@ -8,6 +8,7 @@ void Cpu::log() const {
   std::cout << "Program counter   : " << std::hex << (int)m_pc << "\n";
   std::cout << "Effective address : " << std::hex << (int)m_effective_address
             << "\n";
+  std::cout << "Stack pointer     : " << std::hex << (int)m_s << "\n";
   std::cout << "Accumulator       : " << std::hex << (int)m_a << "\n";
   std::cout << "Index X           : " << std::hex << (int)m_x << "\n";
   std::cout << "Index Y           : " << std::hex << (int)m_y << "\n";
@@ -25,20 +26,28 @@ void Cpu::test() {
   Cpu cpu(&bus);
 
   cpu.m_pc = 0xc010;
-  cpu.m_a = 0x03;
-  cpu.m_x = 0xfe;
+
+  cpu.m_s = 0x30;
+
+  cpu.m_a = 0x81;
+  cpu.m_x = 0x02;
   cpu.m_y = 0x03;
 
-  bus.write(0xc010, 0x04);
+  bus.write(0xc010, 0x05);
   bus.write(0xc011, 0xff);
-  bus.write(0xff04, 0x03);
+  bus.write(0xff04, 0x00);
 
-  cpu.set_flag(carry, true);
-  cpu.absolute_addressing();
-  cpu.ROR();
+  bus.write(0xfffe, 0xff);
+  bus.write(0xffff, 0x20);
 
+  bus.write(0xff05, 0xc0);
+
+  // cpu.absolute_addressing();
+  cpu.NOP();
   cpu.log();
-  std::cout << std::hex << (int)bus.read(0xff04) << "\n";
+
+  // std::cout << std::hex << (int)bus.read(0xff04) << "\n";
+  // std::cout << std::hex << (int)cpu.pop() << "\n";
 }
 
 void Cpu::set_flag(Flag flag, bool value) {
