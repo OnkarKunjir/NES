@@ -20,6 +20,8 @@ addressing_modes = {
     "rel": "relative_addressing",
 }
 
+unofficial_instructions = []
+
 
 def fetch_instruction_set():
     """Function to fetch opcodes from website and save in instruction_set.html file."""
@@ -29,9 +31,11 @@ def fetch_instruction_set():
 
 
 def get_init(instruction):
-    """Function returns struct initalizer for perticular instruction."""
+    """Function returns struct initalizer for perticular instruction.
 
-    name = instruction[0]
+    If replace_unofficial is True then all unofficial instructions are replaced with NOP.
+    """
+    name = instruction[0] if instruction[0] not in unofficial_instructions else "NOP"
     addressing = "imp"
     if len(instruction) == 3:
         addressing = instruction[1]
@@ -42,14 +46,15 @@ def get_init(instruction):
 
 
 def main():
-    # fetch_instruction_set()
+    global unofficial_instructions
+    fetch_instruction_set()
     with open("instruction_set.html", "r") as f:
         page = BeautifulSoup(f.read(), "lxml")
 
-    table = page.find("table")
-    entries = 0
-    rows = table.find_all("tr")[1:]
+    table = page.find_all("table")
 
+    # fetch all instructions.
+    rows = table[0].find_all("tr")[1:]
     instructions = []
     for row in rows:
         cols = row.find_all("td")[1:]
@@ -58,6 +63,12 @@ def main():
 
     tags = re.compile(r"</?[\w]+/?>")
     instructions = map(lambda x: tags.sub(" ", x).strip().split(" "), instructions)
+
+    # find all unofficial instructions.
+    unofficial_instructions = tuple(
+        map(lambda x: x.find("td").text[:3], table[-1].find_all("tr")[1:])
+    )
+
     instructions = map(get_init, instructions)
 
     with open("instruction_mapping.txt", "w") as f:
