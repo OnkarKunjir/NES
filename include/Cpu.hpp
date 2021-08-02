@@ -2,9 +2,9 @@
 
 #include "Bus.hpp"
 
-#include <array>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 /**
  * Cpu class emulates behaviour of 6502 processor used in NES.
@@ -37,9 +37,14 @@ public:
     uint8_t (Cpu::*addressing)(void) = nullptr;
   };
 
+  /**
+   * Function executes instruction pointed by the program counter.
+   */
+  void tick();
+
 private:
   /// Array contains mapping of intruction and addressing mode.
-  std::array<Instruction, 255> m_lookup;
+  std::vector<Instruction> m_lookup;
 
   /// Context of bus.
   Bus *m_bus;
@@ -67,6 +72,9 @@ private:
 
   /// holds the state of cpu.
   bool m_halt;
+
+  /// holds the currently executing opcode.
+  uint8_t m_opcode;
 
   /**
    * Function to set flag value to value in processor status register.
