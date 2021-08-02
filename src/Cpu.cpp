@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Cpu::Cpu(Bus *bus) : m_bus(bus) {}
+Cpu::Cpu(Bus *bus) : m_bus(bus), m_halt(false) {}
 
 void Cpu::log() const {
   std::cout << "Program counter   : " << std::hex << (int)m_pc << "\n";
@@ -34,16 +34,15 @@ void Cpu::test() {
   cpu.m_y = 0x03;
 
   bus.write(0xc010, 0x05);
-  bus.write(0xc011, 0xff);
-  bus.write(0xff04, 0x00);
+  bus.write(0x0005, 0x2f);
+  bus.write(0x0006, 0xcf);
 
   bus.write(0xfffe, 0xff);
   bus.write(0xffff, 0x20);
 
   bus.write(0xff05, 0xc0);
 
-  // cpu.absolute_addressing();
-  cpu.NOP();
+  cpu.indirect_addressing();
   cpu.log();
 
   // std::cout << std::hex << (int)bus.read(0xff04) << "\n";
@@ -73,6 +72,8 @@ uint8_t Cpu::pop() {
   m_s++;
   return m_bus->read(m_s);
 }
+
+uint8_t Cpu::implicit_addressing() { return 0; }
 
 uint8_t Cpu::absolute_addressing() {
   // read low order byte.
@@ -127,6 +128,14 @@ uint8_t Cpu::zero_page_y_indexed() {
   return 0;
 }
 
+uint8_t Cpu::indirect_addressing() {
+  // read the zero page index.
+  m_effective_address = m_bus->read(m_pc++);
+  m_effective_address = ((uint16_t)m_bus->read(m_effective_address + 1) << 8) |
+                        (uint16_t)m_bus->read(m_effective_address);
+  return 0;
+}
+
 uint8_t Cpu::indexed_indirect() {
   // val = PEEK(PEEK((arg + X) % 256) + PEEK((arg + X + 1) % 256) * 256)
   m_effective_address = m_bus->read(m_pc++);
@@ -142,6 +151,11 @@ uint8_t Cpu::indirect_indexed() {
   m_effective_address = m_bus->read(m_effective_address) +
                         m_bus->read((m_effective_address + 1) % 256) * 256 +
                         m_y;
+  return 0;
+}
+
+uint8_t Cpu::KIL() {
+  m_halt = true;
   return 0;
 }
 

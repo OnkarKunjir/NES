@@ -6,7 +6,7 @@ import re
 
 
 addressing_modes = {
-    "imp": "implicit",
+    "imp": "implicit_addressing",
     "imm": "immediate_addressing",
     "zp": "zero_page_addressing",
     "zpx": "zero_page_x_indexed",

@@ -39,8 +39,7 @@ public:
 
 private:
   /// Array contains mapping of intruction and addressing mode.
-  std::array<Instruction, 255> m_lookup = {"hello", &Cpu::ADC,
-                                           &Cpu::absolute_addressing};
+  std::array<Instruction, 255> m_lookup;
 
   /// Context of bus.
   Bus *m_bus;
@@ -66,6 +65,9 @@ private:
   /// holds fetched data from the address m_absolute_address.
   uint8_t m_fetched_data;
 
+  /// holds the state of cpu.
+  bool m_halt;
+
   /**
    * Function to set flag value to value in processor status register.
    * @param flag Specify flag to modify.
@@ -88,6 +90,8 @@ private:
    */
   uint8_t pop();
 
+  uint8_t implicit_addressing();
+
   /**
    * Immidiate addressing uses opcode as value.
    * Each instruction is 2 bytes instruction containing opcode and oprand.
@@ -108,7 +112,6 @@ private:
 
   /**
    * Used in braching instructions.
-   * TODO: yet to be implemented.
    */
   uint8_t relative_addressing();
 
@@ -139,6 +142,12 @@ private:
   uint8_t zero_page_y_indexed();
 
   /**
+   * Indirect indexing is 2 byte instruction where first byte is opcode and 2nd
+   * byte is zero page index. Effective address is stored at zero page index.
+   */
+  uint8_t indirect_addressing();
+
+  /**
    * Indexed indirect is 2 byte long instruction and uses X index register to
    * calculate effective address.
    * @see http://users.telenet.be/kim1-6502/6502/proman.html#f65
@@ -151,6 +160,12 @@ private:
    * @see http://users.telenet.be/kim1-6502/6502/proman.html#f66
    */
   uint8_t indirect_indexed();
+
+  /**
+   * Halts the CPU.
+   * The data bus will be set to $FF
+   */
+  uint8_t KIL();
 
   /**
    * Bitwise AND the memory contents with the accumulator and store result in
