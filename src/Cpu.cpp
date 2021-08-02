@@ -288,19 +288,21 @@ void Cpu::test() {
 
   cpu.m_s = 0x30;
 
-  cpu.m_a = 0x01;
+  cpu.m_a = 0x81;
   cpu.m_x = 0x02;
   cpu.m_y = 0x03;
 
-  bus.write(0xc010, 0xb9);
-  bus.write(0xc011, 0xff);
-  bus.write(0xc012, 0xe0);
-  bus.write(0xe0ff + 0x03, 0x80);
+  cpu.set_flag(carry, true);
+
+  bus.write(0xc010, 0x6e); // opcode
+  bus.write(0xc011, 0xf0);
+  bus.write(0xc012, 0xd0);
+  bus.write(0xd0f0, 0x81);
 
   cpu.tick();
   cpu.log();
 
-  // std::cout << std::hex << (int)bus.read(0xff04) << "\n";
+  std::cout << std::hex << (int)bus.read(0xd0f0) << "\n";
   // std::cout << std::hex << (int)cpu.pop() << "\n";
 }
 
@@ -571,17 +573,34 @@ uint8_t Cpu::INY() {
 
 uint8_t Cpu::ASL() {
   // TODO: implement for implied addressing mode.
-  m_fetched_data = m_bus->read(m_effective_address);
+
+  if (m_lookup[m_opcode].addressing == &Cpu::implicit_addressing) {
+    m_fetched_data = m_a;
+  } else {
+    m_fetched_data = m_bus->read(m_effective_address);
+  }
+
   set_flag(carry, m_fetched_data & 0x80);
   m_fetched_data = m_fetched_data << 1;
   set_flag(negative, m_fetched_data & 0x80);
   set_flag(zero, !m_fetched_data);
-  m_bus->write(m_effective_address, m_fetched_data);
+
+  if (m_lookup[m_opcode].addressing == &Cpu::implicit_addressing) {
+    m_a = m_fetched_data;
+  } else {
+    m_bus->write(m_effective_address, m_fetched_data);
+  }
   return 0;
 }
 
 uint8_t Cpu::ROL() {
-  m_fetched_data = m_bus->read(m_effective_address);
+
+  if (m_lookup[m_opcode].addressing == &Cpu::implicit_addressing) {
+    m_fetched_data = m_a;
+  } else {
+    m_fetched_data = m_bus->read(m_effective_address);
+  }
+
   uint8_t result = m_fetched_data << 1;
   result = result | get_flag(carry);
 
@@ -590,12 +609,22 @@ uint8_t Cpu::ROL() {
   set_flag(zero, !result);
   set_flag(negative, result & 0x80);
 
-  m_bus->write(m_effective_address, result);
+  if (m_lookup[m_opcode].addressing == &Cpu::implicit_addressing) {
+    m_a = result;
+  } else {
+    m_bus->write(m_effective_address, result);
+  }
+
   return 0;
 }
 
 uint8_t Cpu::LSR() {
-  m_fetched_data = m_bus->read(m_effective_address);
+  if (m_lookup[m_opcode].addressing == &Cpu::implicit_addressing) {
+    m_fetched_data = m_a;
+  } else {
+    m_fetched_data = m_bus->read(m_effective_address);
+  }
+
   set_flag(carry, m_fetched_data & 1);
   m_fetched_data = m_fetched_data >> 1;
 
@@ -603,12 +632,21 @@ uint8_t Cpu::LSR() {
   set_flag(zero, !m_fetched_data);
   set_flag(negative, m_fetched_data & 0x80);
 
-  m_bus->write(m_effective_address, m_fetched_data);
+  if (m_lookup[m_opcode].addressing == &Cpu::implicit_addressing) {
+    m_a = m_fetched_data;
+  } else {
+    m_bus->write(m_effective_address, m_fetched_data);
+  }
   return 0;
 }
 
 uint8_t Cpu::ROR() {
-  m_fetched_data = m_bus->read(m_effective_address);
+  if (m_lookup[m_opcode].addressing == &Cpu::implicit_addressing) {
+    m_fetched_data = m_a;
+  } else {
+    m_fetched_data = m_bus->read(m_effective_address);
+  }
+
   uint8_t result = m_fetched_data >> 1;
   result = result | (get_flag(carry) << 7);
 
@@ -617,7 +655,11 @@ uint8_t Cpu::ROR() {
   set_flag(zero, !result);
   set_flag(negative, result & 0x80);
 
-  m_bus->write(m_effective_address, result);
+  if (m_lookup[m_opcode].addressing == &Cpu::implicit_addressing) {
+    m_a = result;
+  } else {
+    m_bus->write(m_effective_address, result);
+  }
   return 0;
 }
 

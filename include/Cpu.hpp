@@ -293,7 +293,6 @@ private:
    * bit is stored in carry flag.
    *
    */
-  // TODO: Change behaviour depending upon addressing mode.
   uint8_t ASL();
 
   /**
