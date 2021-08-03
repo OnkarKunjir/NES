@@ -126,6 +126,7 @@ private:
   /**
    * Similar to absolute_addressing but X index is added to obtain effective
    * address.
+   * Requires one more cycle if page is crossed.
    */
   uint8_t absolute_x_indexed();
 

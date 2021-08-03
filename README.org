@@ -3,7 +3,8 @@
 * Tasks
 - [X] Implement addressing modes.
 - [X] Implement flags.
-- [ ] Implement official instructions.
+- [X] Implement official instructions.
+- [ ] Simulate instruction cycle.
 
 * Resources
 - [[https://wiki.nesdev.com/w/index.php/NES_reference_guide][nesdev reference guide]]

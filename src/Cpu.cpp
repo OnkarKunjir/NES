@@ -290,16 +290,14 @@ void Cpu::test() {
 
   cpu.m_a = 0x81;
   cpu.m_x = 0x02;
-  cpu.m_y = 0x03;
+  cpu.m_y = 0x05;
 
-  cpu.set_flag(carry, true);
+  bus.write(0xc010, 0xf0);
+  bus.write(0xc011, 0xe0);
+  bus.write(0x0020, 0xff);
+  bus.write(0x0021, 0xf2);
+  std::cout << "cycle : " << (int)cpu.absolute_y_indexed() << "\n";
 
-  bus.write(0xc010, 0x6e); // opcode
-  bus.write(0xc011, 0xf0);
-  bus.write(0xc012, 0xd0);
-  bus.write(0xd0f0, 0x81);
-
-  cpu.tick();
   cpu.log();
 
   std::cout << std::hex << (int)bus.read(0xd0f0) << "\n";
@@ -366,7 +364,13 @@ uint8_t Cpu::absolute_x_indexed() {
   m_effective_address =
       ((uint16_t)m_bus->read(m_pc++) << 8) | m_effective_address;
 
+  uint8_t page = (m_effective_address & 0xFF00) >> 8;
   m_effective_address += m_x;
+
+  /// Requries one extra cycle if page is changed.
+  if (page != ((m_effective_address & 0xFF00) >> 8))
+    return 1;
+
   return 0;
 }
 
@@ -377,7 +381,13 @@ uint8_t Cpu::absolute_y_indexed() {
   m_effective_address =
       ((uint16_t)m_bus->read(m_pc++) << 8) | m_effective_address;
 
+  uint8_t page = (m_effective_address & 0xFF00) >> 8;
   m_effective_address += m_y;
+
+  /// Requries one extra cycle if page is changed.
+  if (page != ((m_effective_address & 0xFF00) >> 8))
+    return 1;
+
   return 0;
 }
 
@@ -412,8 +422,14 @@ uint8_t Cpu::indirect_indexed() {
   // val = PEEK(PEEK(arg) + PEEK((arg + 1) % 256) * 256 + Y)
   m_effective_address = m_bus->read(m_pc++);
   m_effective_address = m_bus->read(m_effective_address) +
-                        m_bus->read((m_effective_address + 1) % 256) * 256 +
-                        m_y;
+                        m_bus->read((m_effective_address + 1) % 256) * 256;
+
+  uint8_t page = (m_effective_address & 0xFF00) >> 8;
+  m_effective_address += m_y;
+
+  if (page != ((m_effective_address & 0xFF00) >> 8))
+    return 1;
+
   return 0;
 }
 
@@ -768,56 +784,88 @@ uint8_t Cpu::PHP() {
 
 uint8_t Cpu::BPL() {
   if (!get_flag(negative)) {
+    uint8_t page = (m_pc & 0xFF00) >> 8;
     m_pc += m_effective_address;
+    if (page != ((m_pc & 0xFF00) >> 8))
+      return 2;
+    return 1;
   }
   return 0;
 }
 
 uint8_t Cpu::BMI() {
   if (get_flag(negative)) {
+    uint8_t page = (m_pc & 0xFF00) >> 8;
     m_pc += m_effective_address;
+    if (page != ((m_pc & 0xFF00) >> 8))
+      return 2;
+    return 1;
   }
   return 0;
 }
 
 uint8_t Cpu::BVC() {
   if (!get_flag(overflow)) {
+    uint8_t page = (m_pc & 0xFF00) >> 8;
     m_pc += m_effective_address;
+    if (page != ((m_pc & 0xFF00) >> 8))
+      return 2;
+    return 1;
   }
   return 0;
 }
 
 uint8_t Cpu::BVS() {
   if (get_flag(overflow)) {
+    uint8_t page = (m_pc & 0xFF00) >> 8;
     m_pc += m_effective_address;
+    if (page != ((m_pc & 0xFF00) >> 8))
+      return 2;
+    return 1;
   }
   return 0;
 }
 
 uint8_t Cpu::BCC() {
   if (!get_flag(carry)) {
+    uint8_t page = (m_pc & 0xFF00) >> 8;
     m_pc += m_effective_address;
+    if (page != ((m_pc & 0xFF00) >> 8))
+      return 2;
+    return 1;
   }
   return 0;
 }
 
 uint8_t Cpu::BCS() {
   if (get_flag(carry)) {
+    uint8_t page = (m_pc & 0xFF00) >> 8;
     m_pc += m_effective_address;
+    if (page != ((m_pc & 0xFF00) >> 8))
+      return 2;
+    return 1;
   }
   return 0;
 }
 
 uint8_t Cpu::BNE() {
   if (!get_flag(zero)) {
+    uint8_t page = (m_pc & 0xFF00) >> 8;
     m_pc += m_effective_address;
+    if (page != ((m_pc & 0xFF00) >> 8))
+      return 2;
+    return 1;
   }
   return 0;
 }
 
 uint8_t Cpu::BEQ() {
   if (get_flag(zero)) {
+    uint8_t page = (m_pc & 0xFF00) >> 8;
     m_pc += m_effective_address;
+    if (page != ((m_pc & 0xFF00) >> 8))
+      return 2;
+    return 1;
   }
   return 0;
 }
