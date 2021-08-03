@@ -37,11 +37,12 @@ def get_init(instruction):
     """
     name = instruction[0] if instruction[0] not in unofficial_instructions else "NOP"
     addressing = "imp"
+    cycles = instruction[-1][0] if instruction[-1][0] != "K" else 0
     if len(instruction) == 3:
         addressing = instruction[1]
 
     addressing = addressing_modes[addressing]
-    init = "{" + f'"{name}", &Cpu::{name}, &Cpu::{addressing}' + "}"
+    init = "{" + f'"{name}", &Cpu::{name}, &Cpu::{addressing}, {cycles}' + "}"
     return init
 
 

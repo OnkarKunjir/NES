@@ -35,6 +35,7 @@ public:
     std::string opcode;
     uint8_t (Cpu::*exec)(void) = nullptr;
     uint8_t (Cpu::*addressing)(void) = nullptr;
+    uint8_t cycles;
   };
 
   /**
@@ -75,6 +76,8 @@ private:
 
   /// holds the currently executing opcode.
   uint8_t m_opcode;
+
+  uint8_t m_cycles;
 
   /**
    * Function to set flag value to value in processor status register.
